@@ -1,7 +1,7 @@
 import "./styles.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { getAllCars } from "./redux/carsSlice";
+import { getAllBrands, getAllCars } from "./redux/carsSlice";
 
 export default function App() {
   const dispatch = useDispatch();
@@ -10,7 +10,10 @@ export default function App() {
 
   useEffect(() => {
     dispatch(getAllCars());
+    dispatch(getAllBrands());
   }, []);
+
+  console.log(carState);
 
   return (
     <div className="App">
