@@ -39,6 +39,20 @@ export const getAllBrands = createAsyncThunk("cars/getAllBrands", async () => {
   return brands;
 });
 
+export const getCarsByBrand = createAsyncThunk(
+  "cars/getCarsByBrand",
+  async (thebrand) => {
+    const querySnapshot = await getDocs(collection(db, "Cars"));
+    let cars = [];
+    querySnapshot.forEach((doc) => {
+      if (doc.data().brand == thebrand) {
+        cars.push(doc.data());
+      }
+    });
+    return cars;
+  }
+);
+
 const initialState = {
   loading: false,
   cars: [],
@@ -75,6 +89,19 @@ const carsSlice = createSlice({
     builder.addCase(getAllBrands.rejected, (state, action) => {
       state.loading = false;
       state.brands = [];
+      state.error = "Something went wrong";
+    });
+    builder.addCase(getCarsByBrand.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getCarsByBrand.fulfilled, (state, action) => {
+      state.loading = false;
+      state.cars = action.payload;
+      state.error = "";
+    });
+    builder.addCase(getCarsByBrand.rejected, (state, action) => {
+      state.loading = false;
+      state.cars = [];
       state.error = "Something went wrong";
     });
   },
