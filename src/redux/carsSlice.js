@@ -1,7 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 //configure firebase
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://support.google.com/firebase/answer/7015592
@@ -20,6 +20,16 @@ const app = initializeApp(firebaseConfig);
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 
+//functions for retrieving data
+export const getAllCars = createAsyncThunk("cars/getAllCars", async () => {
+  const querySnapshot = await getDocs(collection(db, "Cars"));
+  let cars = [];
+  querySnapshot.forEach((doc) => {
+    cars.push(doc.data());
+  });
+  return cars;
+});
+
 const initialState = {
   loading: false,
   cars: [],
@@ -31,7 +41,21 @@ const carsSlice = createSlice({
   name: "cars",
   initialState: initialState,
   reducers: {},
-  extraReducers: (builder) => {},
+  extraReducers: (builder) => {
+    builder.addCase(getAllCars.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getAllCars.fulfilled, (state, action) => {
+      state.loading = false;
+      state.cars = action.payload;
+      state.error = "";
+    });
+    builder.addCase(getAllCars.rejected, (state, action) => {
+      state.loading = false;
+      state.cars = [];
+      state.error = "Something went wrong";
+    });
+  },
 });
 
 export default carsSlice.reducer;
